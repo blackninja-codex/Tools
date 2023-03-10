@@ -4,8 +4,8 @@ import argparse
 
 def get_arguments():
 	parser=argparse.ArgumentParser()
-	parser.add_option("-i","--interface",dest="interface",help="Interface to change its mac address")
-	parser.add_option("-m","--mac",dest="new_mac",help="New Mac address")
+	parser.add_argument("-i","--interface",dest="interface",help="Interface to change its mac address")
+	parser.add_argument("-m","--mac",dest="new_mac",help="New Mac address")
 	options=parser.parse_args()
 	if not options.interface:
 		parser.error("please specify an interface")
