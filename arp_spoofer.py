@@ -4,8 +4,8 @@ import argparse
 
 def get_arguments():
 	parser=argparse.ArgumentParser()
-	parser.add_option("-t","--target",dest="target",help="target_ip")
-	parser.add_option("-g","--gateway",dest="gateway",help="gateway_ip")
+	parser.add_argument("-t","--target",dest="target",help="target_ip")
+	parser.add_argument("-g","--gateway",dest="gateway",help="gateway_ip")
 	options=parser.parse_args()
 
 	if not options.interface:
