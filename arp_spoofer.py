@@ -8,10 +8,10 @@ def get_arguments():
 	parser.add_argument("-g","--gateway",dest="gateway",help="gateway_ip")
 	options=parser.parse_args()
 
-	if not options.interface:
-		parser.error("please specify an interface")
-	if not options.new_mac:
-		parser.error("please specify a new mac")
+	if not options.target:
+		parser.error("please specify target")
+	if not options.gateway:
+		parser.error("please specify gateway")
 	return options
 
 def get_mac(ip):
