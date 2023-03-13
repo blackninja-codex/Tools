@@ -5,7 +5,7 @@
 # Run this command in terminal when running mitm to dns spoof
 #iptables -I FORWARD -j NFQUEUE --queue-num 1
 
-#Run iptables --flush to clear iptable rules
+#Run iptables --flush to clear iptable rules after the program is done
 
 from netfilterqueue import NetfilterQueue
 import scapy.all as scapy
