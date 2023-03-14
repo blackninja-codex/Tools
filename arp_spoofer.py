@@ -12,6 +12,10 @@ def get_arguments():
 		parser.error("please specify target")
 	if not options.gateway:
 		parser.error("please specify gateway")
+	if not options.interface:
+		parser.error("please specify an interface")
+	if not options.new_mac:
+		parser.error("please specify a new mac")
 	return options
 
 def get_mac(ip):
@@ -48,3 +52,4 @@ except:
 	print("Error!!!!...Restoring ARP Table\n")
 	restore(target_ip,gateway_ip)
 	restore(gateway_ip,target_ip)
+	
