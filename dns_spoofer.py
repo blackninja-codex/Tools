@@ -32,4 +32,4 @@ def process_packet(packet):
 
 queue=NetfilterQueue()
 queue.bind(1,process_packet)
-queue.run
+queue.run()
