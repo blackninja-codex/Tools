@@ -1,4 +1,4 @@
-import scapy.all scapy
+import scapy.all as scapy
 import time
 import argparse
 
