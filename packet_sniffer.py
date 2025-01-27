@@ -1,10 +1,13 @@
 #install libraries - scapy, scapy_http, sslstrip
+
 import scapy.all as scapy
 from scapy.layers import http
 import argparse
+
 # uncomment to work against https
 #import subprocess
-#subprocess.call(iptables -t nat -A PREROUTING -p tcp --destination-port 80 -j REDIRECT --to-port 10000)
+#import subprocess
+#subprocess.call(["iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "--destination-port", "80", "-j", "REDIRECT", "--to-port", "10000"])
 #subproces.call(sslstrip)
 
 parser=argparse.ArgumentParser()	
