@@ -5,7 +5,7 @@ import argparse
 # uncomment to work against https
 #import subprocess
 #subprocess.call(iptables -t nat -A PREROUTING -p tcp --destination-port 80 -j REDIRECT --to-port 10000)
-#subproces..call(sslstrip)
+#subproces.call(sslstrip)
 
 parser=argparse.ArgumentParser()	
 parser.add_argument("-i","--interface",dest="interface",help="Specify an interface to capture packets")
