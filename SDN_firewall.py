@@ -11,12 +11,12 @@ class HTTPFloodFirewall(app_manager.RyuApp):
 
     def __init__(self, *args, **kwargs):
         super(HTTPFloodFirewall, self).__init__(*args, **kwargs)
-        self.ip_list = {}
-        self.rate_limit = 2 * 10**(-3)  # 2 milliseconds
-        self.rate_limit_counter = {}
-        self.rate_limit_threshold = 100  # Allowed requests within rate_limit_interval
-        self.rate_limit_interval = 1  # 1 second
-        self.allowed_ports = {80, 443}  # Allowed destination ports
+        self.ip_list = {}  # Tracks last request time for each IP
+        self.rate_limit = 2 * 10**(-3)  # 2 milliseconds between requests
+        self.rate_limit_counter = {}  # Tracks request count and last reset time
+        self.rate_limit_threshold = 100  # Max requests per interval
+        self.rate_limit_interval = 1  # 1 second interval
+        self.allowed_ports = {80, 443}  # Allowed destination ports (HTTP/HTTPS)
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
@@ -42,14 +42,18 @@ class HTTPFloodFirewall(app_manager.RyuApp):
         if src_ip in self.rate_limit_counter:
             counter, last_reset = self.rate_limit_counter[src_ip]
             if now - last_reset > self.rate_limit_interval:
+                # Reset counter if interval has passed
                 self.rate_limit_counter[src_ip] = (1, now)
                 return True
             elif counter < self.rate_limit_threshold:
+                # Increment counter if within threshold
                 self.rate_limit_counter[src_ip] = (counter + 1, last_reset)
                 return True
             else:
+                # Drop packet if threshold is exceeded
                 return False
         else:
+            # Initialize counter for new IP
             self.rate_limit_counter[src_ip] = (1, now)
             return True
 
@@ -73,25 +77,20 @@ class HTTPFloodFirewall(app_manager.RyuApp):
             src_ip = ip.src
 
             if ip.proto == 6:  # TCP
-                tcp_pkt = pkt.get_protocol(tcp.tcp)
-                if tcp_pkt.dst_port in self.allowed_ports:  # HTTP or HTTPS
+                tcp_pkt = pkt.get_protocols(tcp.tcp)
+                if tcp_pkt and tcp_pkt[0].dst_port in self.allowed_ports:  # HTTP or HTTPS
                     now = time.time()
                     if src_ip in self.ip_list:
                         time_diff = now - self.ip_list[src_ip]
                         if time_diff < self.rate_limit:
-                            return  # Drop packet
+                            return  # Drop packet if rate limit is exceeded
 
                     self.ip_list[src_ip] = now
 
                     if not self.rate_limit_check(src_ip):
-                        return  # Drop packet due to rate limiting
+                        return  # Drop packet if rate limit threshold is exceeded
 
         # Forward the packet
         actions = [parser.OFPActionOutput(ofproto.OFPP_FLOOD)]
         out = parser.OFPPacketOut(datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port, actions=actions, data=msg.data)
         datapath.send_msg(out)
-
-app_manager.require_app('ryu.controller.rest_conf_switch')
-app_manager.require_app('ryu.controller.ofp_handler')
-app_manager.require_app('ryu.controller.dpset')
-app_manager.require_app('ryu.topology.switches')
