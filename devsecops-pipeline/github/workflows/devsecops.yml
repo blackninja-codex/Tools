@@ -5,13 +5,16 @@ on:
       - master
       - main
 
+env:
+  DOCKER_IMAGE_NAME: my-app  # Default image name
+  DOCKER_IMAGE_TAG: latest   # Default image tag
+
 jobs: 
   sonarcloud:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
-          # Disabling shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
@@ -25,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master # For node projects, change accordingly
+        uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}    
         with:
@@ -37,11 +40,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build Docker image
-        run: docker build -t your-image-name:latest .
+        run: docker build -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }} .
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'your-image-name:latest'
+          image-ref: '${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}'
           format: 'table'
           exit-code: '1'
           severity: 'CRITICAL,HIGH'
